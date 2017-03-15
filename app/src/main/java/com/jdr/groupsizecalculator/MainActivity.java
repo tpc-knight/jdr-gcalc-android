@@ -14,6 +14,9 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
+import com.jdr.groupsizecalculator.permissions.PermissionsManager;
+import com.jdr.groupsizecalculator.permissions.PermissionsManagerImpl;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -22,14 +25,14 @@ import java.util.Date;
 public class MainActivity extends AppCompatActivity {
     static final int REQUEST_IMAGE_CAPTURE = 1;
 
-    // Storage Permissions
-    private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] PERMISSIONS_STORAGE = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-    };
-
     private String mCurrentPhotoPath;
+
+    private PermissionsManager permissionsManager;
+
+    public MainActivity() {
+        super();
+        permissionsManager = new PermissionsManagerImpl();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void launchCamera(View view) {
-        if(verifyStoragePermissions(this)) {
+        if(permissionsManager.hasStoragePermissions(this)) {
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
                 File photoFile = null;
@@ -47,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
                 } catch (IOException ex) {
                     // TODO -- handle this error in the android way
                 }
-                // Continue only if the File was successfully created
+
                 if (photoFile != null) {
                     Uri photoURI = FileProvider.getUriForFile(this,
                             "com.jdr.fileprovider",
@@ -57,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 galleryAddPic();
-                // TODO -- on successful return with image, launch the plotter activity
             }
         }
     }
@@ -67,6 +69,17 @@ public class MainActivity extends AppCompatActivity {
         // TODO -- on successful return with image, launch the plotter activity
 
         alert(R.string.btn_load_picture, "You tried to launch the gallery");
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE) {
+            if (resultCode == RESULT_OK) {
+                Intent plotterIntent = new Intent(this, PlotterActivity.class);
+                plotterIntent.putExtra(PlotterActivity.IMAGE_PATH, mCurrentPhotoPath);
+                startActivity(plotterIntent);
+            }
+        }
     }
 
     private void alert(int title, String message) {
@@ -92,22 +105,6 @@ public class MainActivity extends AppCompatActivity {
         // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = image.getAbsolutePath();
         return image;
-    }
-
-    public static boolean verifyStoragePermissions(Activity activity) {
-        // Check if we have write permission
-        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            // We don't have permission so prompt the user
-            ActivityCompat.requestPermissions(
-                    activity,
-                    PERMISSIONS_STORAGE,
-                    REQUEST_EXTERNAL_STORAGE
-            );
-            return false;
-        }
-        return true;
     }
 
     private void galleryAddPic() {
