@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">GroupSizeCalculator</string>
+    <string name="btn_take_picture">Take Picture</string>
+    <string name="btn_load_picture">Load Picture</string>
 </resources>
