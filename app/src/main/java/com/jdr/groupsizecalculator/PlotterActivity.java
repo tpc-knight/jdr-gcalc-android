@@ -1,9 +1,16 @@
 package com.jdr.groupsizecalculator;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 public class PlotterActivity extends AppCompatActivity {
     public static final String IMAGE_PATH = "imagePath";
@@ -20,5 +27,19 @@ public class PlotterActivity extends AppCompatActivity {
         // Capture the layout's TextView and set the string as its text
         TextView textView = (TextView) findViewById(R.id.plotter_text);
         textView.setText(message);
+
+        Bitmap bitmap = null;
+        try {
+            InputStream is = getContentResolver().openInputStream(Uri.parse(message));
+            bitmap = BitmapFactory.decodeStream(is);
+            is.close();
+        } catch (IOException e) {
+            //TODO -- handle
+        }
+
+        if(bitmap != null) {
+            ImageView imageView = (ImageView) findViewById(R.id.plotter_image);
+            imageView.setImageBitmap(bitmap);
+        }
     }
 }
