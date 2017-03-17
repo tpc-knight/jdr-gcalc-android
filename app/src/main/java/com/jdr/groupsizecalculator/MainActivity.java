@@ -2,7 +2,6 @@ package com.jdr.groupsizecalculator;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Path;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -19,8 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import static java.security.AccessController.getContext;
 
 public class MainActivity extends AppCompatActivity {
     static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -81,12 +78,12 @@ public class MainActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_IMAGE_CAPTURE) {
                 Intent plotterIntent = new Intent(this, PlotterActivity.class);
-                plotterIntent.putExtra(PlotterActivity.IMAGE_PATH, imagePathUriString);
+                plotterIntent.putExtra(PlotterActivity.IMAGE_URI, imagePathUriString);
                 startActivity(plotterIntent);
             }
             if(requestCode == SELECT_IMAGE) {
                 Intent plotterIntent = new Intent(this, PlotterActivity.class);
-                plotterIntent.putExtra(PlotterActivity.IMAGE_PATH, data.getDataString());
+                plotterIntent.putExtra(PlotterActivity.IMAGE_URI, data.getDataString());
                 startActivity(plotterIntent);
             }
         }
