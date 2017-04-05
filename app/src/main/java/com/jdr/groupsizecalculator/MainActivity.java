@@ -89,14 +89,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void alert(int title, String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(title)
-            .setMessage(message);
 
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
 
     private File createImageFile() throws IOException {
         // Create an image file name
@@ -129,23 +122,4 @@ public class MainActivity extends AppCompatActivity {
         mediaScanIntent.setData(contentUri);
         this.sendBroadcast(mediaScanIntent);
     }
-
-    //UPDATED!
-    public String getPath(Uri uri) {
-        String[] projection = { MediaStore.Images.Media.DATA };
-        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
-        if(cursor!=null)
-        {
-            //HERE YOU WILL GET A NULLPOINTER IF CURSOR IS NULL
-            //THIS CAN BE, IF YOU USED OI FILE MANAGER FOR PICKING THE MEDIA
-            int column_index = cursor
-                    .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            String path = cursor.getString(column_index);
-            cursor.close();
-            return path;
-        }
-        else return null;
-    }
-
 }
