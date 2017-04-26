@@ -19,10 +19,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,17 +37,16 @@ public class PlotterActivity extends AppCompatActivity {
     public static final String IMAGE_URI = "imagePath";
 
     private int radius = 50;
+    private int shotIndex = 0;
 
     private Map<String, Point> shotCenterPoints;
-    private Map<String, ShapeDrawable> shotMap = new HashMap<>();
-    private List<ShapeDrawable> drawables = new ArrayList<>();
 
     public PlotterActivity() {
         super();
         shotCenterPoints = new HashMap<>(3);
-        shotCenterPoints.put("shot1", new Point(250, 500));
-        shotCenterPoints.put("shot2", new Point(100, 100));
-        shotCenterPoints.put("shot3", new Point(300, 300));
+        shotCenterPoints.put("shot" + shotIndex++, new Point(250, 500));
+        shotCenterPoints.put("shot" + shotIndex++, new Point(100, 100));
+        shotCenterPoints.put("shot" + shotIndex++, new Point(300, 300));
     }
 
     @Override
@@ -89,6 +90,30 @@ public class PlotterActivity extends AppCompatActivity {
         drawShots();
     }
 
+    //TODO -- maybe need to move this to the frameLayout view?
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        float x = event.getX();
+        float y = event.getY();
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                Toast.makeText(getApplicationContext(), "Touch Down x=" + x +"  y=" + y, Toast.LENGTH_SHORT).show();
+                int parentOffset = getRelativeTop(findViewById(R.id.plotter_layout));
+                shotCenterPoints.put("shot" + shotIndex++, new Point((int) x, (int) y - parentOffset));
+                break;
+            case MotionEvent.ACTION_MOVE:
+
+                //Handle Touch Move
+                break;
+            case MotionEvent.ACTION_UP:
+                Toast.makeText(getApplicationContext(), "Touch Up x=" + x + "  y=" + y, Toast.LENGTH_SHORT).show();
+                break;
+        }
+
+        drawShots();
+        return false;
+    }
+
     // http://stackoverflow.com/questions/3294590/set-the-absolute-position-of-a-view
     private void drawShots() {
         FrameLayout frameLayout = (FrameLayout)findViewById(R.id.plotter_layout);
@@ -99,10 +124,17 @@ public class PlotterActivity extends AppCompatActivity {
             ShotView shotView = new ShotView(this, radius);
 
             FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(radius * 2, radius * 2);
-            params.leftMargin = point.x;
-            params.topMargin  = point.y;
+            params.leftMargin = point.x - radius;
+            params.topMargin  = point.y - radius;
             frameLayout.addView(shotView, params);
         }
+    }
+
+    private int getRelativeTop(View myView) {
+        if (myView.getParent() == myView.getRootView())
+            return myView.getTop();
+        else
+            return myView.getTop() + getRelativeTop((View) myView.getParent());
     }
 
 
@@ -115,6 +147,8 @@ public class PlotterActivity extends AppCompatActivity {
 
             paint = new Paint();
             paint.setColor(Color.RED);
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(4.0f);
             this.radius = radius;
         }
 
